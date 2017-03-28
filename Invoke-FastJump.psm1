@@ -1,10 +1,31 @@
-rm Alias:cd chdir
+# 0. install it: Import-Module .\Invoke-FastJump.psm1 -Force -DisableNameChecking
+# 1. Set-Clipboard only supports in Powershell 5.0 above
+# 2. PSScriptRoot only exists in Powershell 2.0 above
+# 3. Better installtion solution:
+#    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm
+#    New-item ¨Ctype file ¨Cforce $profile
+#    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
 set-alias np "C:\Program Files (x86)\Notepad++\Notepad++.exe"
 set-alias emacs "D:\app\emacs\bin\runemacs.exe"
 set-alias editor np
-function cd
+
+Function ToClipboard {
+    if ($PSVersionTable['PSVersion'].Major -ge 5) {
+        Set-Clipboard -Value $args
+    } else {
+        # call Clip.exe
+    }
+
+}
+
+function dd
 {
-    $ES = ".\es.exe";
+    $ES = "$PSScriptRoot\es.exe";
+    if ($PSVersionTable['PSVersion'].Major -le 2) {
+        $PSScriptRoot = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+    }
+
     if (!(Test-Path (Resolve-Path $ES).Path)){
         Write-Warning "Everything commandline es.exe could not be found on the system please download and install via http://www.voidtools.com/es.zip"
         exit
@@ -36,7 +57,7 @@ function cd
 		$path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($search)
 		if([System.IO.Directory]::Exists($path))
 		{
-			Set-Clipboard $path
+			ToClipboard $path
 			pushd $path
 			return;
 		}
@@ -52,7 +73,7 @@ function cd
     {
         $record = $result;
         if([System.IO.Directory]::Exists($result)){
-            Set-Clipboard $result
+            ToClipboard $result
             pushd $result
         }
     }
@@ -74,7 +95,7 @@ function cd
             $arrlen = $newArray.Count - 1;
             if($arrlen -eq 0)
             {
-                Set-Clipboard $newArray[0]
+                ToClipboard $newArray[0]
 				pushd $newArray[0]
                 break;
             }
@@ -83,7 +104,7 @@ function cd
             $userInput = Read-host "Choose the above folder to fast jump [0 - $arrlen] / [Filter]"
 			if($userInput -eq "")
 			{
-                Set-Clipboard $newArray[0]
+                ToClipboard $newArray[0]
 				pushd $newArray[0]
                 break;
 			}
@@ -99,7 +120,7 @@ function cd
                 
             if($flag -and $inputNum -ge 0 -and $inputNum -le $arrlen)
             {
-                Set-Clipboard $newArray[$inputNum]
+                ToClipboard $newArray[$inputNum]
 				pushd $newArray[$inputNum]
                 break;
             }
@@ -153,7 +174,11 @@ function cd
 
 function ff
 {
-    $ES = ".\es.exe";
+    $ES = "$PSScriptRoot\es.exe";
+    if ($PSVersionTable['PSVersion'].Major -le 2) {
+        $PSScriptRoot = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+    }
+
     if (!(Test-Path (Resolve-Path $ES).Path)){
         Write-Warning "Everything commandline es.exe could not be found on the system please download and install via http://www.voidtools.com/es.zip"
         exit
@@ -185,7 +210,7 @@ function ff
 		$path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($search)
 		if([System.IO.File]::Exists($path))
 		{
-			 Set-Clipboard $path
+			 ToClipboard $path
 			 editor $path
 			 return;
 		}
@@ -200,7 +225,7 @@ function ff
     if($result.Count -eq 1)
     {
         if([System.IO.File]::Exists($result)){
-            Set-Clipboard $result
+            ToClipboard $result
             editor $result
             return;
         }
@@ -295,3 +320,5 @@ function ff
     }
 }
 
+Export-ModuleMember -function dd
+Export-ModuleMember -function ff
