@@ -1,5 +1,7 @@
-rm Alias:cd chdir 
-
+rm Alias:cd chdir
+set-alias np "C:\Program Files (x86)\Notepad++\Notepad++.exe"
+set-alias emacs "D:\app\emacs\bin\runemacs.exe"
+set-alias editor np
 function cd
 {
     $ES = ".\es.exe";
@@ -184,7 +186,7 @@ function ff
 		if([System.IO.File]::Exists($path))
 		{
 			 Set-Clipboard $path
-			 emacs $path
+			 editor $path
 			 return;
 		}
 
@@ -199,7 +201,7 @@ function ff
     {
         if([System.IO.File]::Exists($result)){
             Set-Clipboard $result
-            emacs $result
+            editor $result
             return;
         }
     }
@@ -221,15 +223,15 @@ function ff
             $arrlen = $newArray.Count - 1;
             if($arrlen -eq 0)
             {
-                emacs $newArray[0]
+                editor $newArray[0]
                 break;
             }
 
             $flag = $true
-            $userInput = Read-host "Choose the above file to fast open with Emacs [0 - $arrlen] / [Filter]"
+            $userInput = Read-host "Choose the above file to fast open with editor [0 - $arrlen] / [Filter]"
 			if($userInput -eq "")
 			{
-				emacs $newArray[0]
+				editor $newArray[0]
                 break;
 			}
 			
@@ -244,7 +246,7 @@ function ff
                 
             if($flag -and $inputNum -ge 0 -and $inputNum -le $arrlen)
             {
-                emacs $newArray[$inputNum]
+                editor $newArray[$inputNum]
                 break;
             }
             else
